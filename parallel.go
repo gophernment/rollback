@@ -1,4 +1,4 @@
-package async
+package rollback
 
 func SyncParallel(workers ...Worker) error {
 	var gerr error
