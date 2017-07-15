@@ -13,10 +13,15 @@ func fakeCreateWorkerErrorFunc(email string) error {
 	return errors.New("worker error")
 }
 
+func fakeCreateEmpFunc(email string) error {
+	return nil
+}
+
 type fakeCreateAcct struct {
 	email, pass string
 	err         error
 	chErr       chan error
+	rollback    bool
 }
 
 func (h *fakeCreateAcct) Do() error {
@@ -24,16 +29,17 @@ func (h *fakeCreateAcct) Do() error {
 }
 
 func (h *fakeCreateAcct) Rollback() {
-
+	h.rollback = true
 }
 func (h *fakeCreateAcct) Err() <-chan error {
 	return h.chErr
 }
 
 type fakeCreateWorker struct {
-	email string
-	err   error
-	chErr chan error
+	email    string
+	err      error
+	chErr    chan error
+	rollback bool
 }
 
 func (h *fakeCreateWorker) Do() error {
@@ -41,18 +47,37 @@ func (h *fakeCreateWorker) Do() error {
 }
 
 func (h *fakeCreateWorker) Rollback() {
-
+	h.rollback = true
 }
 func (h *fakeCreateWorker) Err() <-chan error {
 	return h.chErr
 }
 
+type fakeCreateEmp struct {
+	email    string
+	err      error
+	chErr    chan error
+	rollback bool
+}
+
+func (h *fakeCreateEmp) Do() error {
+	return fakeCreateEmpFunc(h.email)
+}
+
+func (h *fakeCreateEmp) Rollback() {
+	h.rollback = true
+}
+func (h *fakeCreateEmp) Err() <-chan error {
+	return h.chErr
+}
+
 func TestAsyncHandler(t *testing.T) {
 	chErr := make(chan error)
+	chDone := make(chan struct{})
 	chFinish := make(chan struct{})
 	chRollback := make(chan struct{})
 
-	go AsyncHandler(chErr, chFinish, chRollback, &fakeCreateAcct{})
+	go AsyncHandler(chErr, chDone, chFinish, chRollback, &fakeCreateAcct{})
 
 	err := <-chErr
 	if err != nil {
@@ -62,10 +87,11 @@ func TestAsyncHandler(t *testing.T) {
 
 func TestAsyncHandlerError(t *testing.T) {
 	chErr := make(chan error)
+	chDone := make(chan struct{})
 	chFinish := make(chan struct{})
 	chRollback := make(chan struct{})
 
-	go AsyncHandler(chErr, chFinish, chRollback, &fakeCreateWorker{})
+	go AsyncHandler(chErr, chDone, chFinish, chRollback, &fakeCreateWorker{})
 
 	err := <-chErr
 	if err == nil {

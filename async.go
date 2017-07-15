@@ -12,7 +12,11 @@ type Worker interface {
 	Err() <-chan error
 }
 
-func AsyncHandler(cherr chan error, chFinish, chRollback chan struct{}, w Worker) {
+func AsyncHandler(cherr chan error, chDone, chFinish, chRollback chan struct{}, w Worker) {
+	defer func() {
+		chDone <- struct{}{}
+	}()
+
 	err := w.Do()
 	if err != nil {
 		cherr <- errors.Wrap(err, "common create user")
@@ -30,5 +34,4 @@ func AsyncHandler(cherr chan error, chFinish, chRollback chan struct{}, w Worker
 		w.Rollback()
 		return
 	}
-
 }
