@@ -9,7 +9,6 @@ import (
 type Worker interface {
 	Do() error
 	Rollback()
-	Err() <-chan error
 }
 
 func AsyncHandler(cherr chan error, chDone, chFinish, chRollback chan struct{}, w Worker) {

@@ -31,9 +31,6 @@ func (h *fakeCreateAcct) Do() error {
 func (h *fakeCreateAcct) Rollback() {
 	h.rollback = true
 }
-func (h *fakeCreateAcct) Err() <-chan error {
-	return h.chErr
-}
 
 type fakeCreateWorker struct {
 	email    string
@@ -49,9 +46,6 @@ func (h *fakeCreateWorker) Do() error {
 func (h *fakeCreateWorker) Rollback() {
 	h.rollback = true
 }
-func (h *fakeCreateWorker) Err() <-chan error {
-	return h.chErr
-}
 
 type fakeCreateEmp struct {
 	email    string
@@ -66,9 +60,6 @@ func (h *fakeCreateEmp) Do() error {
 
 func (h *fakeCreateEmp) Rollback() {
 	h.rollback = true
-}
-func (h *fakeCreateEmp) Err() <-chan error {
-	return h.chErr
 }
 
 func TestAsyncHandler(t *testing.T) {
