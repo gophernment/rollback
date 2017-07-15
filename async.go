@@ -1,11 +1,5 @@
 package rollback
 
-import (
-	"fmt"
-
-	"github.com/pkg/errors"
-)
-
 type Worker interface {
 	Do() error
 	Rollback()
@@ -18,7 +12,7 @@ func AsyncHandler(cherr chan error, chDone, chFinish, chRollback chan struct{}, 
 
 	err := w.Do()
 	if err != nil {
-		cherr <- errors.Wrap(err, "common create user")
+		cherr <- err
 		return
 	}
 
@@ -26,10 +20,8 @@ func AsyncHandler(cherr chan error, chDone, chFinish, chRollback chan struct{}, 
 
 	select {
 	case <-chFinish:
-		fmt.Println("create Account finish")
 		return
 	case <-chRollback:
-		fmt.Println("create Account rollback")
 		w.Rollback()
 		return
 	}
