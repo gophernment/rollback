@@ -34,9 +34,9 @@ func SyncParallel(workers ...Worker) error {
 		return gerr
 	}
 
-	chFinish <- struct{}{}
-	chFinish <- struct{}{}
-	chFinish <- struct{}{}
+	for i := 0; i < total; i++ {
+		chFinish <- struct{}{}
+	}
 
 	return nil
 }
