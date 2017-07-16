@@ -27,16 +27,11 @@ func SyncParallel(workers ...Worker) error {
 	}
 
 	if errCount != 0 {
-		broadcast := total - errCount
-		for i := 0; i < broadcast; i++ {
-			chRollback <- struct{}{}
-		}
+		close(chRollback)
 		return gerr
 	}
 
-	for i := 0; i < total; i++ {
-		chFinish <- struct{}{}
-	}
+	close(chFinish)
 
 	return nil
 }
