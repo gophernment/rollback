@@ -18,20 +18,17 @@ func SyncParallel(workers ...Worker) error {
 		go AsyncHandler(chErr, chDone, chFinish, chRollback, workers[i])
 	}
 
-	errCount := 0
 	for i := 0; i < total; i++ {
 		if err := <-chErr; err != nil {
 			gerr = err
-			errCount++
 		}
 	}
 
-	if errCount != 0 {
+	if gerr != nil {
 		close(chRollback)
 		return gerr
 	}
 
 	close(chFinish)
-
 	return nil
 }
